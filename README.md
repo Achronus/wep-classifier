@@ -4,7 +4,7 @@ This repository focuses on a Wild Edible Plant Classifier that compares the perf
 
 ## Dataset
 
-![Plant Classes](https://github.com/Achronus/wep-classifier/tree/main/imgs/classes.png "Wild Edible Plant Classes")
+![Plant Classes](https://github.com/Achronus/wep-classifier/blob/main/imgs/classes.png "Wild Edible Plant Classes")
 
 The 35 classes of wild edible plants are listed in the table below, accompanied by the number of images (per class) within the dataset. The dataset created is comprised of Flickr images, obtained through their API using the rudimentary scripts within the `\data_gathering` folder. The dataset can be found on Kaggle [here](https://www.kaggle.com/ryanpartridge01/wild-edible-plants/) and contains 16,535 images, where the quantity of images per class varies from 400 to 500.
 
@@ -58,14 +58,14 @@ The 35 classes of wild edible plants are listed in the table below, accompanied 
 |Pickerelweed|454|
 |Ramsons|489|
 |Red clover|449|
-|Total|16,535|
+|_Total_|_16,535_|
 
 </td></tr>
 </table>
 
 ## File Structure
 
-![ML Pipeline](https://github.com/Achronus/wep-classifier/tree/main/imgs/ml_pipeline.png "Machine Learning Pipeline")
+![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml_pipeline.png "Machine Learning Pipeline")
 
 The file structure used for the artefact is outlined below and has helped to achieve the Machine Learning (ML) pipeline illustrated above.
 
@@ -104,6 +104,11 @@ pip install -r requirements.txt
 
 Alternatively, this command can be run separately within a command line interface.
 
+<table>
+<tr><td>
+
+</td><td>
+
 |Package|Version|
 |-------|-------|
 |Python|3.9.2|
@@ -111,10 +116,19 @@ Alternatively, this command can be run separately within a command line interfac
 |Numpy|1.20.1|
 |Torch|1.7.0|
 |Torchvision|0.8.1|
+
+</td><td>
+
+|Package|Version|
+|-------|-------|
 |Scipy|1.6.0|
 |Pandas|1.2.2|
 |Scikit-learn|0.2.4|
 |Scikit-plot|0.3.7|
+|_Total packages_|_9_|
+
+</td></tr>
+</table>
 
 ## References
 
