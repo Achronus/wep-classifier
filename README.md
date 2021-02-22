@@ -4,7 +4,7 @@ This repository focuses on a Wild Edible Plant Classifier that compares the perf
 
 ## Dataset
 
-![Plant Classes](https://github.com/Achronus/wep-classifier/blob/main/imgs/classes.png "Wild Edible Plant Classes")
+![Plant Classes](https://github.com/Achronus/wep-classifier/blob/main/imgs/plant-classes.png "Wild Edible Plant Classes")
 
 The 35 classes of wild edible plants are listed in the table below, accompanied by the number of images (per class) within the dataset. The dataset created is comprised of Flickr images, obtained through their API using the rudimentary scripts within the `\data_gathering` folder. The dataset can be found on Kaggle [here](https://www.kaggle.com/ryanpartridge01/wild-edible-plants/) and contains 16,535 images, where the quantity of images per class varies from 400 to 500.
 
