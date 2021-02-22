@@ -65,7 +65,7 @@ The 35 classes of wild edible plants are listed in the table below, accompanied 
 
 ## File Structure
 
-![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml_pipeline.png "Machine Learning Pipeline")
+![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml-pipeline.png "Machine Learning Pipeline")
 
 The file structure used for the artefact is outlined below and has helped to achieve the Machine Learning (ML) pipeline illustrated above.
 
