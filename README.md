@@ -96,13 +96,45 @@ The artefact code is run within the two Jupyter Notebooks - `1. wep_classifier_i
 
 ## Dependencies
 
-The repository contains a `requirements.txt` file that outlines the required Python libraries and packages. For convenience, a table below highlights the listed packages and versions. Both Jupyter Notebooks present the opportunity to install the required libraries from the text file by running the following command:
+This project requires a Python 3 environment, which can be created by following the instructions below.
 
-``` CMD
-pip install -r requirements.txt
-```
+1. Create (and activate) a new environment.
 
-Alternatively, this command can be run separately within a command line interface.
+   - Linux or Mac
+
+    ```bash
+    conda create --name wep
+    source activate wep
+    ```
+
+   - Windows
+
+   ```bash
+   conda create --name wep
+   activate wep
+   ```
+
+2. Clone the repository, navigate to the `wep-classifier/` folder and install the required dependencies.
+
+    _(Note)_ a requirements.txt file is accessible within this folder which details a list of the required dependencies.
+
+    ```bash
+    git clone https://github.com/Achronus/wep-classifier.git
+    cd wep-classifier
+    conda install -c conda-forge jupyterlab
+    conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
+    pip install -r requirements.txt
+    ```
+
+3. Create an [IPython kernel](http://ipython.readthedocs.io/en/stable/install/kernel_install.html) for the `wep` environment.
+
+    ```bash
+    python -m ipykernel install --user --name wep --display-name "wep"
+    ```
+
+4. Run the `jupyter-lab` command to start JupyterLab and access the Jupyter Notebooks.
+
+A list of the used packages and versions are highlighted in the table below.
 
 <table>
 <tr><td>
