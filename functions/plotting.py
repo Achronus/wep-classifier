@@ -131,6 +131,19 @@ class Plotter():
         Displays a table of the given models statistics.
         
         Parameters:
-            model_stats (dictionary) - a list or single dict of statistics of trained models
+            model_stats (list/dictionary) - a list or single dict of statistics of trained models
         """
-        pass
+        # Set initial variables
+        headers = ['Name', 'Accuracy', 'Top-1 Error', 'Top-5 Error', 
+                   'Precision', 'Recall', 'F1-Score']
+        table = pd.DataFrame(columns=headers)
+        
+        # Add rows if list
+        if isinstance(model_stats, list):
+            for i in range(len(model_stats)):
+                table = table.append(model_stats[i], ignore_index=True)
+        # Add row if single dict
+        else:
+            table = table.append(model_stats, ignore_index=True)
+        
+        return table.style.hide_index()
