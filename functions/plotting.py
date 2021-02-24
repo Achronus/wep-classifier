@@ -101,7 +101,7 @@ class Plotter():
         Creates a confusion matrix for the given model.
         
         Parameters:
-            model (list) - models to evaluate
+            model (torchvision.models) - models to evaluate
             model_name (string) - name of model
             y_pred (torch.Tensor) - test or validation loader predictions
             y_true (torch.Tensor) - dataloader labels
@@ -113,26 +113,24 @@ class Plotter():
                                      x_tick_rotation=90,
                                      title=model_name + " Confusion Matrix")
 
-    def plot_roc(self, model, model_name, y_probs, y_true):
+    def plot_roc(self, model, model_name, y_probas, y_true, figsize=(25, 15)):
         """
-        Creates a ROC plot for the given model.
+        Creates multiple subplots of the ROC curve for each classes using the given model.
         
         Parameters:
-            model (list) - models to evaluate
+            model (torchvision.models) - models to evaluate
             model_name (string) - name of model
-            y_probs (torch.Tensor) - test or validation loader probabilities
+            y_probas (torch.Tensor) - test or validation loader probabilities
             y_true (torch.Tensor) - dataloader labels
+            figsize (tuple) - subplot figure size
         """
-        plot_roc(y_true, y_probs, figsize=(25, 15),
-                 title=model_name + " ROC Plot")
+        plot_roc(y_true, y_probas, figsize=figsize, title=model_name + " ROC Plots")
     
-    def plot_statistics(self, models):
+    def plot_stats(self, model_stats):
         """
-        - Classification accuracy
-        - Top-1 error rate
-        - Top-5 error rate
-        - Precision
-        - Recall
-        - F1-score
+        Displays a table of the given models statistics.
+        
+        Parameters:
+            model_stats (dictionary) - a list or single dict of statistics of trained models
         """
         pass
