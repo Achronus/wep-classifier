@@ -122,7 +122,7 @@ This project requires a Python 3 environment, which can be created by following 
     git clone https://github.com/Achronus/wep-classifier.git
     cd wep-classifier
     conda install -c conda-forge jupyterlab
-    conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
+    conda install pytorch torchvision cudatoolkit=11.0 -c pytorch
     pip install -r requirements.txt
     ```
 
@@ -146,8 +146,8 @@ A list of the used packages and versions are highlighted in the table below.
 |Python|3.9.2|
 |Matplotlib|3.3.4|
 |Numpy|1.20.1|
-|Torch|1.7.0|
-|Torchvision|0.8.1|
+|Torch|1.7.1|
+|Torchvision|0.8.2|
 
 </td><td>
 
