@@ -462,8 +462,8 @@ class Utilities():
         # Store model stats
         stats = {'Name': model_name, 
                  'Accuracy': accuracy, 
-                 'Top-1 Error Rate': error_rate_1, 
-                 'Top-5 Error Rate': error_rate_5, 
+                 'Top-1 Error': error_rate_1, 
+                 'Top-5 Error': error_rate_5, 
                  'Precision': precision, 
                  'Recall': recall, 
                  'F1-Score': f1_score}
