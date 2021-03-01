@@ -8,6 +8,8 @@ This repository focuses on a Wild Edible Plant Classifier that compares the perf
 
 The 35 classes of wild edible plants are listed in the table below, accompanied by the number of images (per class) within the dataset. The dataset created is comprised of Flickr images, obtained through their API using the rudimentary scripts within the `\data_gathering` folder. The dataset can be found on Kaggle [here](https://www.kaggle.com/ryanpartridge01/wild-edible-plants/) and contains 16,535 images, where the quantity of images per class varies from 400 to 500.
 
+A sample of this dataset is used within the first Notebook to visualise  the classes of data. The small sample is contained within a zip file found inside the dataset folder.
+
 <table>
 <tr><td>
 
@@ -77,22 +79,28 @@ The file structure used for the artefact is outlined below and has helped to ach
 |   +-- get_filenames.py
 |   +-- img_rename.py
 |   +-- resize_images.py
++-- dataset
+|   +-- sample.zip
 +-- functions
 |   +-- model.py
 |   +-- plotting.py
+|   +-- tuning.py
 |   +-- utils.py
 +-- saved_models
-|   +-- googlnet_model.pt
-|   +-- mobilenetv2_model.pt
-|   +-- resnet34_model.pt
+|   +-- best_googlenet.pt
+|   +-- best_mobilenetv2.pt
+|   +-- best_resnet34.pt
 +-- 1. wep_classifier_initial.ipynb
 +-- 2. wep_classifier_tuning.ipynb
++-- 3. visualise_results.ipynb
++-- LICENSE
++-- README.md
 +-- requirements.txt
 ```
 
 As mentioned earlier, the `\data_gathering` folder outlines scripts that were used to gather and prepare the Flickr image data (2, 3 in ML pipeline). The `\functions` folder holds the classes and functions used to perform all the functionality of the artefact. This covers all the remaining parts of the pipeline (4 -> 7).
 
-The artefact code is run within the two Jupyter Notebooks - `1. wep_classifier_initial.ipynb` (steps 4 -> 6) and `2. wep_classifier_tuning.ipynb` (step 7).
+The artefact code is run within three Jupyter Notebooks - `1. wep_classifier_initial.ipynb` (steps 4 -> 6), `2. wep_classifier_tuning.ipynb` (step 7), and `3. visualise_results.ipynb` (step 6 for step 7).
 
 ## Dependencies
 
