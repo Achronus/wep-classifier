@@ -28,7 +28,7 @@ class Utilities():
         Used to split the specified dataset into dataloaders and return them.
         
         Parameters:
-            dataset (np_array) - dataset of images
+            dataset (torchvision.ImageFolder) - dataset of images
             batch_size (int) - number of images per batch
             split_size (float) - size of split for both the test and validation sets
             seed (int) - number for recreating previous instances
@@ -105,7 +105,7 @@ class Utilities():
 
                 # Set images and labels to GPU
                 images, labels = images.to(self.device), labels.to(self.device)
-
+                
                 # Train model
                 optimizer.zero_grad() # zero gradients each epoch
                 output = model(images) # forward pass
