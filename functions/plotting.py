@@ -75,7 +75,7 @@ class Plotter():
         
         # Save plot
         if plot_name is not None and save:
-            fig.savefig("plots/" + plot_name + ".png")
+            fig.savefig(f"plots/{plot_name}.png")
     
     def plot_losses(self, model, model_name):
         """
@@ -93,7 +93,7 @@ class Plotter():
         plt.xlabel("Iterations")
         plt.ylabel("Losses")
         plt.legend(loc="upper right")
-        plt.title(model_name + " Loss Comparison")
+        plt.title(f"{model_name} Loss Comparison")
     
     def plot_cm(self, model, model_name, y_pred, y_true):
         """
@@ -110,7 +110,7 @@ class Plotter():
         disp = plot_confusion_matrix(y_true, y_pred, figsize=(25, 15),
                                      labels=self.class_labels,
                                      x_tick_rotation=90,
-                                     title=model_name + " Confusion Matrix")
+                                     title=f"{model_name} Confusion Matrix")
 
     def plot_roc(self, model, model_name, y_probas, y_true, figsize=(25, 15)):
         """
@@ -123,7 +123,7 @@ class Plotter():
             y_true (torch.Tensor) - dataloader labels
             figsize (tuple) - subplot figure size
         """
-        plot_roc(y_true, y_probas, figsize=figsize, title=model_name + " ROC Plots")
+        plot_roc(y_true, y_probas, figsize=figsize, title=f"{model_name} ROC Plots")
     
     def plot_stats(self, model_stats):
         """
@@ -145,4 +145,4 @@ class Plotter():
         else:
             table = table.append(model_stats, ignore_index=True)
         
-        return table.style.hide_index()
+        return table

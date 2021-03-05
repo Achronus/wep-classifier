@@ -34,7 +34,8 @@ class Utilities():
             seed (int) - number for recreating previous instances
         """
         # Obtain dataset indices
-        np.random.seed(seed) # Set random seed
+        torch.manual_seed(seed) # Set seed
+        np.random.seed(seed)
         num_train = len(dataset) # 16,526
         idxs = list(range(num_train))
         np.random.shuffle(idxs) # Shuffle the idxs
@@ -144,9 +145,7 @@ class Utilities():
                         print(f"Validation loss decreased ({valid_loss_min:.3f}",
                               f"-> {valid_loss:.3f}). Saving model...")
                         valid_loss_min = valid_loss
-                        self.save_model(model, filepath, valid_loss_min,
-                                        train_loss, accuracy,
-                                        train_losses, valid_losses)
+                        self.save_model(model, filepath, train_losses, valid_losses)
                         self.counter = 0 # Reset early stop counter
 
                     # Early stop if patience reached before epochs end
@@ -271,25 +270,18 @@ class Utilities():
                 
         return early_stop
     
-    def save_model(self, model, filepath, valid_loss, train_loss,
-                   accuracy, train_losses, valid_losses):
+    def save_model(self, model, filepath, train_losses, valid_losses):
         """
         Used to save a trained model with utility information.
         
         Parameters:
             model (torchvision.models) - model to save
             filepath (string) - filepath and name of model to save
-            valid_loss (float) - best validation loss
-            train_loss (float) - best training loss
-            accuracy (float) - best validation accuracy
             train_losses (list) - train losses during training 
             valid_losses (list) - validation losses during training
         """
         # Save the model parameters
         torch.save({'parameters': model.state_dict(),
-                    'valid_loss': valid_loss,
-                    'train_loss': train_loss,
-                    'accuracy': accuracy,
                     'train_losses': train_losses,
                     'valid_losses': valid_losses,
                     }, filepath)
@@ -302,24 +294,26 @@ class Utilities():
             model (torchvision.models) - model to load
             filepath (string) - filepath and name of saved model
         """
-        # Set a checkpoint and load the model parameters
+        # Set a checkpoint
         checkpoint = torch.load(filepath)
-        model.load_state_dict(checkpoint['parameters'])
         
         # Store utility variables
-        model.valid_loss = checkpoint['valid_loss']
-        model.train_loss = checkpoint['train_loss']
-        model.valid_accuracy = checkpoint['accuracy']
         model.train_losses = checkpoint['train_losses']
         model.valid_losses = checkpoint['valid_losses']
         
-    def time_taken(self, train_time):
+        # load model parameters
+        model.load_state_dict(checkpoint['parameters'])
+        
+    def time_taken(self, time_diff):
         """
         Calculates the training time taken in hours, minutes and seconds.
+        
+        Parameters:
+            time_diff (float) - time difference between start and end
         """
-        min_secs, secs = divmod(train_time, 60)
+        min_secs, secs = divmod(time_diff, 60)
         hours, mins = divmod(min_secs, 60)
-        print(f"Total training time: {hours:.2f} hrs {mins:.2f} mins {secs:.2f} secs")
+        print(f"Total time taken: {hours:.2f} hrs {mins:.2f} mins {secs:.2f} secs")
     
     def indices_to_labels(self, y_pred, y_true, class_labels):
         """
