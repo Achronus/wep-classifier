@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from functions.tuning import Tuner
+
 from sklearn.metrics import confusion_matrix
 from scikitplot.metrics import plot_confusion_matrix, plot_roc
 
@@ -15,6 +17,7 @@ class Plotter():
     def __init__(self, labels):
         self.class_labels = labels
         self.class_labels_idx = np.array(range(len(labels)))
+        self.tune = Tuner()
     
     def imshow(self, img):
         """
@@ -42,15 +45,13 @@ class Plotter():
             self.imshow(imgs[idx])
             ax.set_title(self.class_labels[labels[idx]])
     
-    def create_plots(self, models, model_names, figsize, plot_func, 
-                     plot_name=None, save=False):
+    def create_plots(self, models, figsize, plot_func, plot_name=None, save=False):
         """
         Dynamically creates the correct amount of plots depending on number of models
         passed in.
         
         Parameters:
             models (list) - one or more models
-            model_names (list) - model names in string format
             figsize (tuple) - size of each subplot figure
             plot_func (function) - type of plot to create
             plot_name (string) - plot name for saving
@@ -64,13 +65,13 @@ class Plotter():
             # Create individual plot
             for idx in np.arange(num_cols):
                 fig.add_subplot(1, num_cols, idx+1)
-                plot_func(models[idx], model_names[idx])
+                plot_func(models[idx], self.tune.model_names[idx])
             plt.show()
             
         # Create single plot
         else:
             fig = plt.figure()
-            plot_func(models, model_names)
+            plot_func(models, self.tune.model_names)
             plt.show()
         
         # Save plot
@@ -95,7 +96,7 @@ class Plotter():
         plt.legend(loc="upper right")
         plt.title(f"{model_name} Loss Comparison")
     
-    def plot_cm(self, model, model_name, y_pred, y_true):
+    def plot_cm(self, model, model_name, y_pred, y_true, save=False):
         """
         Creates a confusion matrix for the given model.
         
@@ -111,8 +112,11 @@ class Plotter():
                                      labels=self.class_labels,
                                      x_tick_rotation=90,
                                      title=f"{model_name} Confusion Matrix")
+        
+        if save:
+            plt.savefig(f'plots/{model_name}_cm.png')
 
-    def plot_roc(self, model, model_name, y_probas, y_true, figsize=(25, 15)):
+    def plot_roc(self, model, model_name, y_probas, y_true, figsize=(25, 15), save=False):
         """
         Creates multiple subplots of the ROC curve for each classes using the given model.
         
@@ -124,6 +128,9 @@ class Plotter():
             figsize (tuple) - subplot figure size
         """
         plot_roc(y_true, y_probas, figsize=figsize, title=f"{model_name} ROC Plots")
+        
+        if save:
+            plt.savefig(f'plots/{model_name}_roc.png')
     
     def plot_stats(self, model_stats):
         """
@@ -146,3 +153,50 @@ class Plotter():
             table = table.append(model_stats, ignore_index=True)
         
         return table
+    
+    def plot_model_predictions(self, models, batch_sizes, save=False, n_rows=2, n_cols=20):
+        """
+        Used to plot each models image classification predictions. Images are labelled with the prediction and the true label in brackets. A green name means the prediction is correct, otherwise it is red.
+        Parameters:
+            models (list) - best torchvision.models
+            batch_size (list) - integers of images per batch for each model
+            save (boolean) - If true, saves the plots created to plots folder
+            n_rows (int) - number of rows in subplots
+            n_cols (int) - number of columns in subplots (images to show)
+        """
+        temp = self.tune.utils.seed
+        
+        # Iterate over models and batches
+        for idx, model in enumerate(models):
+            for batch in batch_sizes:
+                # Check batch size matches
+                if model.batch_size == batch:
+                    _, _, test_loader = self.tune.utils.split_data(self.tune.utils.dataset, 
+                                                                   batch, 
+                                                                   self.tune.utils.split_size, 
+                                                                   temp)
+                    # Obtain one batch of test images
+                    dataiter = iter(test_loader)
+                    imgs, lbls = dataiter.next()
+
+                    # Get predictions
+                    model.cpu()
+                    preds = torch.exp(model.forward(imgs)).max(dim=1)[1].numpy()
+                    imgs = imgs[:n_cols]
+
+                    # Plot n_cols images in the batch, along with predicted and true labels
+                    fig = plt.figure(figsize=(25, 4))
+                    fig.suptitle(f"{self.tune.model_names[idx]} Predictions vs True Labels")
+                    for idx in np.arange(n_cols):
+                        ax = fig.add_subplot(n_rows, int(np.ceil(n_cols/n_rows)), idx+1, 
+                                             xticks=[], yticks=[])
+                        ax.imshow(self.tune.unnorm(imgs[idx]).permute(1, 2, 0).numpy())
+                        ax.set_title(f"{self.class_labels[preds[idx]]}\n" \
+                                     f"({self.class_labels[lbls[idx]]})",
+                                     color=("green" if preds[idx] == lbls[idx] else "red"))
+                    fig.subplots_adjust(top=0.8, hspace=0.55)
+            
+                    if save:
+                        plt.savefig(f'plots/{self.tune.model_names[idx]}_preds.png')
+
+            temp += 1 # Obtain different batch for plotting next model
