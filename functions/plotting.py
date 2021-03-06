@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from functions.tuning import Tuner
 
+import torch
 from sklearn.metrics import confusion_matrix
 from scikitplot.metrics import plot_confusion_matrix, plot_roc
 
@@ -45,13 +46,14 @@ class Plotter():
             self.imshow(imgs[idx])
             ax.set_title(self.class_labels[labels[idx]])
     
-    def create_plots(self, models, figsize, plot_func, plot_name=None, save=False):
+    def create_plots(self, models, model_names, figsize, plot_func, plot_name=None, save=False):
         """
         Dynamically creates the correct amount of plots depending on number of models
         passed in.
         
         Parameters:
-            models (list) - one or more models
+            models (list) - one or more torchvision.models
+            model_names (list) - name of models as strings
             figsize (tuple) - size of each subplot figure
             plot_func (function) - type of plot to create
             plot_name (string) - plot name for saving
@@ -65,13 +67,13 @@ class Plotter():
             # Create individual plot
             for idx in np.arange(num_cols):
                 fig.add_subplot(1, num_cols, idx+1)
-                plot_func(models[idx], self.tune.model_names[idx])
+                plot_func(models[idx], model_names[idx])
             plt.show()
             
         # Create single plot
         else:
             fig = plt.figure()
-            plot_func(models, self.tune.model_names)
+            plot_func(models, model_names)
             plt.show()
         
         # Save plot
@@ -154,27 +156,31 @@ class Plotter():
         
         return table
     
-    def plot_model_predictions(self, models, batch_sizes, save=False, n_rows=2, n_cols=20):
+    def plot_model_predictions(self, models, model_names, batch_sizes, filepath, split_size,
+                               seed, save=False, n_rows=2, n_cols=20):
         """
         Used to plot each models image classification predictions. Images are labelled with the prediction and the true label in brackets. A green name means the prediction is correct, otherwise it is red.
         Parameters:
             models (list) - best torchvision.models
-            batch_size (list) - integers of images per batch for each model
+            model_names (list) - a list of the model names as strings
+            batch_sizes (list) - integers of images per batch for each model
+            filepath (string) - filepath to dataset of images
+            split_size (float) - size of split for both the test and validation sets
+            seed (int) - number for recreating previous instances
             save (boolean) - If true, saves the plots created to plots folder
             n_rows (int) - number of rows in subplots
             n_cols (int) - number of columns in subplots (images to show)
         """
-        temp = self.tune.utils.seed
+        dataset = self.tune.set_data(filepath)
+        temp = seed
         
         # Iterate over models and batches
-        for idx, model in enumerate(models):
+        for m, model in enumerate(models):
             for batch in batch_sizes:
                 # Check batch size matches
                 if model.batch_size == batch:
-                    _, _, test_loader = self.tune.utils.split_data(self.tune.utils.dataset, 
-                                                                   batch, 
-                                                                   self.tune.utils.split_size, 
-                                                                   temp)
+                    _, _, test_loader = self.tune.utils.split_data(dataset, batch, 
+                                                                   split_size, temp)
                     # Obtain one batch of test images
                     dataiter = iter(test_loader)
                     imgs, lbls = dataiter.next()
@@ -186,7 +192,7 @@ class Plotter():
 
                     # Plot n_cols images in the batch, along with predicted and true labels
                     fig = plt.figure(figsize=(25, 4))
-                    fig.suptitle(f"{self.tune.model_names[idx]} Predictions vs True Labels")
+                    fig.suptitle(f"{model_names[m]} Predictions vs True Labels")
                     for idx in np.arange(n_cols):
                         ax = fig.add_subplot(n_rows, int(np.ceil(n_cols/n_rows)), idx+1, 
                                              xticks=[], yticks=[])
@@ -197,6 +203,6 @@ class Plotter():
                     fig.subplots_adjust(top=0.8, hspace=0.55)
             
                     if save:
-                        plt.savefig(f'plots/{self.tune.model_names[idx]}_preds.png')
+                        plt.savefig(f'plots/{model_names[m]}_preds.png')
 
             temp += 1 # Obtain different batch for plotting next model
