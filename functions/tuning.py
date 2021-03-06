@@ -78,7 +78,6 @@ class Tuner:
         # Set class specific variables
         self.h_layers = h_layers
         self.n_classes = n_classes
-        self.model_names = ["GoogLeNet", "MobileNet-V2", "ResNet-34"]
         
         # Create instances of pretrained CNN architectures
         googlenet = models.googlenet(pretrained=True)
@@ -149,7 +148,7 @@ class Tuner:
         Used to tune a model on the given training loader, evaluated against the validation loader. Iterates over a list of hidden layers, saving multiple model versions.
         
         Parameters:
-            model_names (list) - a list of the model names
+            model_names (list) - a list of the model names as strings
             batch_size (int) - batch size of the train and validation loader
             train_loader (torch.DataLoader) - torch training dataset loader
             valid_loader (torch.DataLoader) - torch validation dataset loader
@@ -168,7 +167,7 @@ class Tuner:
             # Iterate over models
             for m in range(len(models)):
                 filename = self._set_filename(model_names[m], batch_size, h_layers[l])
-                filepath = "saved_models/" + filename + ".pt"
+                filepath = f"saved_models/{filename}.pt"
                 
                 # Skip model training if already has been trained
                 if os.path.isfile(filepath):
@@ -225,15 +224,16 @@ class Tuner:
         
         return model, load_name
     
-    def save_best_models(self, model_stats):
+    def save_best_models(self, model_stats, model_names):
         """
         Used to save the three best performing models based on the statistics of all model variations. Returns a list of the best models.
         
         Parameters:
             model_stats (pandas.DataFrame) - table of best model statistics
+            model_names (list) - model names as strings
         """
         best_models = []
-        n_models = len(self.model_names)
+        n_models = len(model_names)
         count = 1
         start_time = time.time()
         
@@ -245,7 +245,7 @@ class Tuner:
             cnn_models = self._set_initial_models(self.n_classes, h_layers)
 
             # Check names match
-            for cnn_name in self.model_names:
+            for cnn_name in model_names:
                 if name == cnn_name:
                     # Load model and store it
                     model = cnn_models[idx]
