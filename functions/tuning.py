@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 
 from functions.model import Classifier
@@ -10,6 +11,27 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 import torchvision.datasets
 import torchvision.models as models
+
+class UnNormalize(object):
+    """
+    Used to convert a normalized torch tensor (image) into an unnormalized state. Used for plotting classification prediction images.
+    """
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, tensor):
+        """
+        Parameters:
+            tensor (torch.Tensor): Tensor image of size (colour, height, width) to be normalized.
+        Returns:
+            torch.Tensor: Normalized image.
+        """
+        # Normalized state: t.sub_(m).div_(s) - simply perform opposite
+        for t, m, s in zip(tensor, self.mean, self.std):
+            t.mul_(s).add_(m)
+            
+        return tensor
 
 class Tuner:
     """
@@ -26,6 +48,9 @@ class Tuner:
         Parameters:
             filepath (string) - filepath to the dataset
         """
+        mean = (0.5, 0.5, 0.5)
+        std = (0.5, 0.5, 0.5)
+        
         # Set transformations for batch data
         transform = transforms.Compose([
             transforms.Resize(224), # Resize images to 224
@@ -33,12 +58,13 @@ class Tuner:
             transforms.RandomHorizontalFlip(), # Randomly flip some samples (50% chance)
             transforms.RandomRotation(20), # Randomly rotate some samples
             transforms.ToTensor(), # Convert image to a tensor
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)) # Normalize image values
+            transforms.Normalize(mean=mean, std=std) # Normalize image values
         ])
         
-        # Set dataset and labels
+        # Set dataset, labels and unnormalized object
         dataset = torchvision.datasets.ImageFolder(filepath, transform=transform)
         self.labels = np.array(list(dataset.class_to_idx), dtype=object)
+        self.unnorm = UnNormalize(mean=mean, std=std)
         return dataset
     
     def _set_initial_models(self, n_classes, h_layers):
@@ -49,6 +75,11 @@ class Tuner:
             n_classes (int) - number of classes for to output
             h_layers (list) - integers that represent each layers node count 
         """
+        # Set class specific variables
+        self.h_layers = h_layers
+        self.n_classes = n_classes
+        self.model_names = ["GoogLeNet", "MobileNet-V2", "ResNet-34"]
+        
         # Create instances of pretrained CNN architectures
         googlenet = models.googlenet(pretrained=True)
         mobilenetv2 = models.mobilenet_v2(pretrained=True)
@@ -159,26 +190,8 @@ class Tuner:
                     # Train model
                     self.utils.train(models[m], train_loader, valid_loader, criterion, 
                                      optimizer, filepath, epochs, iterations, patience)
-
-    def get_model_names(self, model_paths):
-        """
-        Used to obtain the model names from a list of saved models filenames.
-        
-        Parameters:
-            model_paths (list) - saved model names as strings
-        """
-        model_names = []
-        
-        # Set model names
-        for item in model_paths:
-            model_names.extend(item.split('_')) # Split into individual components
-        
-        model_names = list(set(model_names)) # Create a unique list
-        model_names.sort() # Sort into order (numbers first)
-        model_names = model_names[-3:] # Get only model names
-        return model_names
                     
-    def set_model(self, model_paths, model, model_name, batch_size, h_layers):
+    def set_model(self, model_paths, model, model_name):
         """
         Used to check what type of model needs to be set for testing. Returns the model and its name.
         
@@ -188,55 +201,57 @@ class Tuner:
             model_paths (list) - list of filepaths of saved models
             model (torchvision.models) - initial pretrained model
             model_name (string) - name of the model
-            batch_size (int) - number of dataset batches
-            hidden_size (list) - hidden node sizes as integers
         """
         # Set initial variables
         load_name = ""
-        compare_parts = [model_name, batch_size]
-        compare_parts.extend(h_layers)
+        compare_parts = [model_name, self.utils.batch_size]
+        compare_parts.extend(self.h_layers)
         
         # Iterate over each model
         for filepath in model_paths:
             compare_name = filepath.split('/')[-1].rstrip('.pt').split('_')
-
-            if compare_name[0] == compare_parts[0] \
-            and compare_name[1] == str(compare_parts[1]) \
-            and compare_name[-2] == str(compare_parts[-2]) \
-            and compare_name[-1] == str(compare_parts[-1]):
-                # Return saved model
+            valid = []
+            
+            # Check components match
+            for item in range(len(compare_name)):
+                if compare_name[item] == str(compare_parts[item]):
+                    valid.append(True)
+            
+            # Load saved model
+            if len(valid) == len(compare_name):
                 load_name = filepath.split('/')[-1].rstrip('.pt')
-                self.utils.load_model(model, 'saved_models/' + filepath)
+                self.utils.load_model(model, f'saved_models/{filepath}')
                 break
         
         return model, load_name
     
-    def save_best_models(self, model_stats, model_names, n_classes):
+    def save_best_models(self, model_stats):
         """
-        Used to save the three best performing models based on the statistics of all model variations.
+        Used to save the three best performing models based on the statistics of all model variations. Returns a list of the best models.
         
         Parameters:
             model_stats (pandas.DataFrame) - table of best model statistics
-            model_names (list) - name of the models as strings
-            n_classes (int) - number of output classes
         """
         best_models = []
+        n_models = len(self.model_names)
+        count = 1
+        start_time = time.time()
         
         # Iterate over each model
         for idx, item in enumerate(model_stats['Name']):
             name, batch, h1, h2 = item.split('_')
             h_layers = [int(h1), int(h2)]
             filepath = f'saved_models/{item}.pt'
-            cnn_models = self._set_initial_models(n_classes, h_layers)
-            
+            cnn_models = self._set_initial_models(self.n_classes, h_layers)
+
             # Check names match
-            for cnn_name in model_names:
+            for cnn_name in self.model_names:
                 if name == cnn_name:
                     # Load model and store it
                     model = cnn_models[idx]
                     self.utils.load_model(model, filepath)
                     best_models.append(model)
-                    new_name = cnn_name.replace('-', '').lower()
+                    filename = cnn_name.replace('-', '').lower()
                     
                     # Set statistics
                     stats = list(model_stats.iloc[idx, 1:])
@@ -245,29 +260,62 @@ class Tuner:
                              'recall': stats[4], 'f1-score': stats[5]}
                     
                     # Set additional model parameters
-                    model.batch_size = batch
+                    model.batch_size = int(batch)
                     model.h_layers = h_layers
                     model.stats = stats
                     
+                    # Save model predictions
+                    print(f"Calculating preds and stats for {name}...", end=" ")
+                    _, _, test_loader = self.utils.split_data(self.utils.dataset, int(batch), 
+                                                              self.utils.split_size, 
+                                                              self.utils.seed)
+                    self._save_predictions(model, test_loader)
+                    print(f"Complete ({count}/{n_models}).")
+                    count += 1
+                    
                     # Save as best model
-                    self._save_model(model)
+                    print(f"Saving model...", end=" ")
+                    self._save_model(model, filename)
+                    print(f"Complete.")
         
+        self.utils.time_taken(time.time() - start_time)
         return best_models
     
-    def _save_model(self, model):
+    def _save_predictions(self, model, test_loader):
+        """
+        Helper function used to save the best models predictions, labels and probabilities for plotting.
+        
+        Parameters:
+            model (torchvision.models) - models predictions to save
+            valid_loader (torch.DataLoader) - torch test dataset loader
+        """
+        # Calculate predictions, labels and probabilities for best models
+        y_pred, y_true, y_probas = self.utils.predict(model, test_loader, 
+                                                      store_labels=True,
+                                                      store_probas=True)
+        # Store data
+        model.y_pred = y_pred
+        model.y_true = y_true
+        model.y_probas = y_probas
+    
+    def _save_model(self, model, filename):
         """
         Helper function used to save the best models.
         
         Parameters:
             model (torchvision.models) - model to save
+            filename (string) - filename of model to save
         """
         torch.save({'parameters': model.state_dict(),
                     'train_losses': model.train_losses,
                     'valid_losses': model.valid_losses,
                     'batch_size': model.batch_size,
                     'h_layers': model.h_layers,
-                    'stats': model.stats, 
-                    }, f'saved_models/best_{new_name}.pt')
+                    'stats': model.stats,
+                    'y_pred': model.y_pred,
+                    'y_true': model.y_true,
+                    'y_probas': model.y_probas,
+                    }, f'saved_models/best_{filename}.pt')
         
     def load_best_models(self, models, filenames):
         """
@@ -279,7 +327,7 @@ class Tuner:
         """
         # Set a checkpoint
         for idx, model in enumerate(models):
-            checkpoint = torch.load(f"saved_models/{filenames[i]}.pt")
+            checkpoint = torch.load(f"saved_models/{filenames[idx]}.pt")
 
             # Store utility variables
             model.train_losses = checkpoint['train_losses']
@@ -287,6 +335,9 @@ class Tuner:
             model.batch_size = checkpoint['batch_size']
             model.h_layers = checkpoint['h_layers']
             model.stats = checkpoint['stats']
+            model.y_pred = checkpoint['y_pred']
+            model.y_true = checkpoint['y_true']
+            model.y_probas = checkpoint['y_probas']
 
             # load model parameters
             model.load_state_dict(checkpoint['parameters'])
