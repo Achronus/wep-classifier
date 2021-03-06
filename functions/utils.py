@@ -52,6 +52,9 @@ class Utilities():
         test_sampler = SubsetRandomSampler(test_idx)
         
         # Set class specific variables for other functions
+        self.dataset = dataset
+        self.split_size = split_size
+        self.seed = seed
         self.batch_size = batch_size
         self.trainset_size = len(train_sampler)
 
