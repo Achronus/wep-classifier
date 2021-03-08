@@ -73,7 +73,7 @@ class Tuner:
         
         Parameters:
             n_classes (int) - number of classes for to output
-            h_layers (list) - integers that represent each layers node count 
+            h_layers (list) - integers that represent each layers node count, can be 1 list or 3 lists
         """
         # Set class specific variables
         self.h_layers = h_layers
@@ -85,12 +85,26 @@ class Tuner:
         resnet34 = models.resnet34(pretrained=True)
         
         # Initialize new classifiers
-        gnet_classifier = Classifier(in_features=googlenet.fc.in_features, out_features=n_classes, 
-                                     hidden_layers=h_layers)
-        mobilenet_classifier = Classifier(in_features=mobilenetv2.classifier[1].in_features, 
-                                          out_features=n_classes, hidden_layers=h_layers)
-        resnet_classifier = Classifier(in_features=resnet34.fc.in_features, out_features=n_classes, 
-                                       hidden_layers=h_layers)
+        if isinstance(h_layers[0], list):
+            gnet_classifier = Classifier(in_features=googlenet.fc.in_features, 
+                                         out_features=n_classes, 
+                                         hidden_layers=h_layers[0])
+            mobilenet_classifier = Classifier(in_features=mobilenetv2.classifier[1].in_features, 
+                                              out_features=n_classes, 
+                                              hidden_layers=h_layers[1])
+            resnet_classifier = Classifier(in_features=resnet34.fc.in_features, 
+                                           out_features=n_classes, 
+                                           hidden_layers=h_layers[2])
+        else:
+            gnet_classifier = Classifier(in_features=googlenet.fc.in_features, 
+                                         out_features=n_classes, 
+                                         hidden_layers=h_layers)
+            mobilenet_classifier = Classifier(in_features=mobilenetv2.classifier[1].in_features, 
+                                              out_features=n_classes, 
+                                              hidden_layers=h_layers)
+            resnet_classifier = Classifier(in_features=resnet34.fc.in_features, 
+                                           out_features=n_classes, 
+                                           hidden_layers=h_layers)
         
         cnn_models = [googlenet, mobilenetv2, resnet34]
         # Freeze architecture parameters to avoid backpropagating them
