@@ -153,7 +153,7 @@ A list of the used packages and versions are highlighted in the table below.
 |-------|-------|
 |Python|3.9.2|
 |Matplotlib|3.3.4|
-|Numpy|1.20.1|
+|NumPy|1.20.1|
 |Torch|1.7.1|
 |Torchvision|0.8.2|
 
@@ -161,7 +161,7 @@ A list of the used packages and versions are highlighted in the table below.
 
 |Package|Version|
 |-------|-------|
-|Scipy|1.6.0|
+|SciPy|1.6.0|
 |Pandas|1.2.2|
 |Scikit-learn|0.2.4|
 |Scikit-plot|0.3.7|
