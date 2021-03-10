@@ -67,9 +67,9 @@ class Tuner:
         self.unnorm = UnNormalize(mean=mean, std=std)
         return dataset
     
-    def _set_initial_models(self, n_classes, h_layers):
+    def set_initial_models(self, n_classes, h_layers):
         """
-        Helper function used to set the three models (GoogLeNet, MobileNet v2, and ResNet-34) with new classifiers.
+        Used to set the three models (GoogLeNet, MobileNet v2, and ResNet-34) with new classifiers.
         
         Parameters:
             n_classes (int) - number of classes for to output
@@ -129,7 +129,7 @@ class Tuner:
             n_classes (int) - number of output classes
             h_layers (list) - hidden node integers, one per layer
         """
-        models = self._set_initial_models(n_classes, h_layers)
+        models = self.set_initial_models(n_classes, h_layers)
         
         # Total params for each model
         for idx, model in enumerate(models):
@@ -176,7 +176,7 @@ class Tuner:
         # Iterate over hidden layers
         for l in range(len(h_layers)):
             # Create instances of pretrained CNN architectures
-            models = self._set_initial_models(n_classes, h_layers[l])
+            models = self.set_initial_models(n_classes, h_layers[l])
 
             # Iterate over models
             for m in range(len(models)):
@@ -256,7 +256,7 @@ class Tuner:
             name, batch, h1, h2 = item.split('_')
             h_layers = [int(h1), int(h2)]
             filepath = f'saved_models/{item}.pt'
-            cnn_models = self._set_initial_models(self.n_classes, h_layers)
+            cnn_models = self.set_initial_models(self.n_classes, h_layers)
 
             # Check names match
             for cnn_name in model_names:
