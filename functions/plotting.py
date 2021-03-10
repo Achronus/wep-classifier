@@ -13,7 +13,7 @@ class Plotter():
     Used to create plots and visualise the given dataset.
     
     Parameters:
-        labels (np_array) - list of plant class labels as strings
+        labels (numpy.array) - list of plant class labels as strings
     """
     def __init__(self, labels):
         self.class_labels = labels
@@ -32,8 +32,8 @@ class Plotter():
         Creates subplots of a sample of images.
         
         Parameters:
-            imgs (np_array) - batch of images
-            labels (np_array) - batch of image labels
+            imgs (numpy.array) - batch of images
+            labels (numpy.array) - batch of image labels
             figsize (tuple) - subplot figure size
             num_rows (int) - number of rows in subplots
             num_cols (int) - number of columns in subplots
