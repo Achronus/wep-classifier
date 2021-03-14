@@ -357,4 +357,5 @@ class Tuner:
             model.load_state_dict(checkpoint['parameters'])
         
         print("Models loaded. Utility variables available:")
-        print("\ttrain_losses, valid_losses, batch_size, h_layers, stats, parameters.")
+        print("\ttrain_losses, valid_losses, batch_size, h_layers, stats,\n")
+        print("\ty_pred, y_true, y_probas, parameters.")
