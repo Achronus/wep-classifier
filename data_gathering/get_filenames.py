@@ -3,8 +3,10 @@ import pandas as pd
 
 def get_filenames(DIRECTORY):
   """
-  Returns a list of filenames within a 
-  given directory.
+  Returns a list of filenames within a given directory.
+
+  Command example:
+    python get_filenames.py 'alfalfa'
   """
   # Get filenames
   path = os.getcwd() + "\\dataset\\" + DIRECTORY + "\\"

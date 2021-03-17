@@ -2,9 +2,10 @@ import os, sys
 
 if __name__ == '__main__':
   """
-  Used to quickly rename files within a given directory, 
-  inside a dataset folder. It takes the name of the folder
-  and uses it as each image name accompanied by a number.
+  Used to quickly rename files within a given directory. The name of the folder is used as each image name accompanied by a number. For example: alfalfa0.jpg.
+
+  Command example:
+    python img_rename.py 'alfalfa'
   """
   # Set directory and path variables
   DIR_NAME = sys.argv[1]
