@@ -238,13 +238,14 @@ class Tuner:
         
         return model, load_name
     
-    def save_best_models(self, model_stats, model_names):
+    def save_best_models(self, model_stats, model_names, n_preds):
         """
         Used to save the three best performing models based on the statistics of all model variations. Returns a list of the best models.
         
         Parameters:
             model_stats (pandas.DataFrame) - table of best model statistics
             model_names (list) - model names as strings
+            n_preds (int) - number of additional predictions to store (e.g. top-5)
         """
         best_models = []
         n_models = len(model_names)
@@ -283,7 +284,7 @@ class Tuner:
                     _, _, test_loader = self.utils.split_data(self.utils.dataset, int(batch), 
                                                               self.utils.split_size, 
                                                               self.utils.seed)
-                    self._save_predictions(model, test_loader)
+                    self._save_predictions(model, test_loader, n_preds)
                     print(f"Complete ({count}/{n_models}).")
                     count += 1
                     
@@ -295,21 +296,24 @@ class Tuner:
         self.utils.time_taken(time.time() - start_time)
         return best_models
     
-    def _save_predictions(self, model, test_loader):
+    def _save_predictions(self, model, test_loader, n_preds):
         """
         Helper function used to save the best models predictions, labels and probabilities for plotting.
         
         Parameters:
             model (torchvision.models) - models predictions to save
             valid_loader (torch.DataLoader) - torch test dataset loader
+            n_preds (int) - number of additional predictions to store (e.g. top-5)
         """
         # Calculate predictions, labels and probabilities for best models
-        y_pred, y_true, y_probas = self.utils.predict(model, test_loader, 
-                                                      store_labels=True,
-                                                      store_probas=True)
+        y_pred, y_true, all_n_preds, y_probas = self.utils.predict(model, test_loader, 
+                                                                   n_preds,
+                                                                   store_labels=True,
+                                                                   store_probas=True)
         # Store data
         model.y_pred = y_pred
         model.y_true = y_true
+        model.n_preds = all_n_preds
         model.y_probas = y_probas
     
     def _save_model(self, model, filename):
@@ -328,6 +332,7 @@ class Tuner:
                     'stats': model.stats,
                     'y_pred': model.y_pred,
                     'y_true': model.y_true,
+                    'n_preds': model.n_preds,
                     'y_probas': model.y_probas,
                     }, f'saved_models/best_{filename}.pt')
         
@@ -351,6 +356,7 @@ class Tuner:
             model.stats = checkpoint['stats']
             model.y_pred = checkpoint['y_pred']
             model.y_true = checkpoint['y_true']
+            model.n_preds = checkpoint['n_preds']
             model.y_probas = checkpoint['y_probas']
 
             # load model parameters
@@ -358,4 +364,4 @@ class Tuner:
         
         print("Models loaded. Utility variables available:")
         print("\ttrain_losses, valid_losses, batch_size, h_layers, stats,\n")
-        print("\ty_pred, y_true, y_probas, parameters.")
+        print("\ty_pred, y_true, n_preds, y_probas.")

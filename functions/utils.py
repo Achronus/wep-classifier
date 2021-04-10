@@ -200,20 +200,21 @@ class Utilities():
         return valid_loss, accuracy
     
     @torch.no_grad()
-    def predict(self, model, x_test, store_labels=False, store_probas=False):
+    def predict(self, model, x_test, n_preds=5, store_labels=False, store_probas=False):
         """
         Make predictions on the selected DataLoader. Returns the predictions (y_pred), image labels (y_true), and the prediction probabilities (y_probas).
         
         Parameters:
             model (torchvision.models) - model to make predictions with
             x_test (torch.DataLoader) - torch validation or test loader
+            n_preds (int) - number of predictions to store per output value
             store_labels (boolean) - when true stores image labels
             store_probas (boolean) - when true stores prediction probabilities
         """
         accuracy = 0
         model.to(self.device)
         predictions, img_labels = torch.tensor([]), torch.tensor([])
-        all_probas = torch.tensor([])
+        all_probas, all_n_preds = torch.tensor([]), torch.tensor([])
         
         for images, labels in x_test:
             images, labels = images.to(self.device), labels.to(self.device)
@@ -224,12 +225,19 @@ class Utilities():
             # Log-softmax requires numbers to be exponential to get probabilities 
             probabilities = torch.exp(output)
             
+            # Calculate n predictions
+            _, top_n_preds = probabilities.topk(n_preds, dim=1) # get indices only
+            
             # Get class with highest probability
             batch_pred = probabilities.max(dim=1)[1]
             
             # Store predictions
             predictions = torch.cat((predictions.to(self.device),
                                      batch_pred), dim=0)
+            
+            # Store n predictions
+            all_n_preds = torch.cat((all_n_preds.to(self.device), 
+                                     top_n_preds), dim=0)
             
             # Store respective items
             if store_labels and store_probas:
@@ -246,13 +254,13 @@ class Utilities():
         
         # Return respective items
         if store_labels and store_probas:
-            return predictions.cpu(), img_labels.cpu(), all_probas.cpu()
+            return predictions.cpu(), img_labels.cpu(), all_n_preds.cpu(), all_probas.cpu()
         elif store_labels:
-            return predictions.cpu(), img_labels.cpu()
+            return predictions.cpu(), img_labels.cpu(), all_n_preds.cpu()
         elif store_probas:
-            return predictions.cpu(), all_probas.cpu()
+            return predictions.cpu(), all_n_preds.cpu(), all_probas.cpu()
         else:
-            return predictions.cpu()
+            return predictions.cpu(), all_n_preds.cpu()
     
     def early_stopping(self, valid_loss, patience):
         """
@@ -345,51 +353,6 @@ class Utilities():
             
         return y_pred, y_true
     
-    def _top_n_preds(self, model, x_test, y_pred, n_preds):
-        """
-        Helper function used to calculate the top N predictions.
-        
-        Parameters:
-            model (torchvision.models) - trained model
-            x_test (torch.DataLoader) - test or validation loader
-            y_pred (torch.Tensor) - test or validation loader predictions
-            n_preds (int) - number of predictions to calculate
-        """
-        # Set initial variables
-        top_preds = torch.tensor([])
-        top_preds = torch.cat((top_preds, y_pred), dim=0)
-        
-        # Calculate other predictions
-        for _ in range(n_preds-1):
-            other_preds = self.predict(model, x_test)
-            top_preds = torch.cat((top_preds, other_preds), dim=0)
-
-        return top_preds
-    
-    def _split_predictions(self, top_n_preds, n_preds):
-        """
-        Helper function used to split the top N predictions into separate lists. This function is used to calculate the top-N error rate.
-        
-        Parameters:
-            top_n_preds (torch.Tensor) - top N model predictions
-            n_preds (int) - number of predictions to calculate
-        """
-        # Set initial parameters
-        counter, start_idx = 1, 0
-        n_batches = int(len(top_n_preds) / n_preds) # 1_pred size
-        image_preds = torch.zeros((n_batches, n_preds))
-        
-        # Split into image predictions (n_preds)
-        for batch in range(n_preds):
-            # Add batch as separate list
-            image_preds[:, batch] = top_n_preds[start_idx:n_batches * counter]
-            
-            # Go to next batch and increment counter
-            start_idx += n_batches
-            counter += 1
-        
-        return image_preds
-    
     def _calc_precision_recall(self, y_pred, y_true):
         """
         Helper function used to calculate the precision and recall of a model.
@@ -420,7 +383,7 @@ class Utilities():
         
         return precision, recall
     
-    def calc_statistics(self, model, model_name, x_test, y_pred, y_true, n_preds=5):
+    def calc_statistics(self, model, model_name, x_test, y_pred, y_true, n_preds):
         """
         Used to calculate a table of statistics for the given model within a Pandas DataFrame. 
         
@@ -432,11 +395,9 @@ class Utilities():
             x_test (torch.DataLoader) - test or validation loader
             y_pred (torch.Tensor) - test or validation loader predictions
             y_true (torch.Tensor) - test or validation loader image labels
-            n_preds (int) - number of predictions to calculate
+            n_preds (torch.Tensor) - test or validation loader n predictions
         """
         # Run helper functions
-        top_preds = self._top_n_preds(model, x_test, y_pred, n_preds)
-        image_preds = self._split_predictions(top_preds, n_preds)
         precision, recall = self._calc_precision_recall(y_pred, y_true)
         
         # Calculate accuracy and top-1 error rate
@@ -445,10 +406,10 @@ class Utilities():
         error_rate_1 = 1 - accuracy
         
         # Calculate top-5 error rate
-        image_preds, y_true = image_preds.to(self.device), y_true.to(self.device)
+        n_preds, y_true = n_preds.to(self.device), y_true.to(self.device)
         top_5_correct = 0
-        for pred in range(len(image_preds)):
-            pred_bools = image_preds[pred].eq(y_true[pred])
+        for pred in range(len(y_true)):
+            pred_bools = n_preds[pred].eq(y_true[pred])
             if True in pred_bools:
                 top_5_correct += 1
         error_rate_5 = 1 - (top_5_correct / len(y_true))
