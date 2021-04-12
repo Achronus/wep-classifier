@@ -17,7 +17,7 @@ class Classifier(nn.Module):
         # First hidden layer
         self.hidden_layers = nn.ModuleList([nn.Linear(in_features, hidden_layers[0])])
         
-        # Add more hidden layers based
+        # Add more hidden layers
         layer_sizes = zip(hidden_layers[:-1], hidden_layers[1:])
         self.hidden_layers.extend([nn.Linear(h1, h2) for h1, h2 in layer_sizes])
         

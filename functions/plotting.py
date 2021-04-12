@@ -142,8 +142,7 @@ class Plotter():
             model_stats (list/dictionary) - a list or single dict of statistics of trained models
         """
         # Set initial variables
-        headers = ['Name', 'Accuracy', 'Top-1 Error', 'Top-5 Error', 
-                   'Precision', 'Recall', 'F1-Score']
+        headers = list(model_stats[0].keys())
         table = pd.DataFrame(columns=headers)
         
         # Add rows if list

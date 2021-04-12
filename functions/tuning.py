@@ -254,8 +254,8 @@ class Tuner:
         
         # Iterate over each model
         for idx, item in enumerate(model_stats['Name']):
-            name, batch, h1, h2 = item.split('_')
-            h_layers = [int(h1), int(h2)]
+            name, batch = item.split('_')[:2]
+            h_layers = list(map(int, item.split("_")[2:]))
             filepath = f'saved_models/{item}.pt'
             cnn_models = self.set_initial_models(self.n_classes, h_layers)
 
@@ -269,10 +269,7 @@ class Tuner:
                     filename = cnn_name.replace('-', '').lower()
                     
                     # Set statistics
-                    stats = list(model_stats.iloc[idx, 1:])
-                    stats = {'accuracy': stats[0], 'top-1 error': stats[1],
-                             'top-5 error': stats[2], 'precision': stats[3],
-                             'recall': stats[4], 'f1-score': stats[5]}
+                    stats = model_stats.iloc[idx, 1:].to_dict()
                     
                     # Set additional model parameters
                     model.batch_size = int(batch)

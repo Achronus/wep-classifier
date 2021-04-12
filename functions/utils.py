@@ -152,7 +152,7 @@ class Utilities():
                         self.counter = 0 # Reset early stop counter
 
                     # Early stop if patience reached before epochs end
-                    elif self.early_stopping(valid_loss, patience):
+                    elif self._early_stopping(patience):
                         stop = True
                         break
 
@@ -211,7 +211,6 @@ class Utilities():
             store_labels (boolean) - when true stores image labels
             store_probas (boolean) - when true stores prediction probabilities
         """
-        accuracy = 0
         model.to(self.device)
         predictions, img_labels = torch.tensor([]), torch.tensor([])
         all_probas, all_n_preds = torch.tensor([]), torch.tensor([])
@@ -262,12 +261,11 @@ class Utilities():
         else:
             return predictions.cpu(), all_n_preds.cpu()
     
-    def early_stopping(self, valid_loss, patience):
+    def _early_stopping(self, patience):
         """
-        Used to stop training early if the validation loss hasn't improved after a given amount of patience (epochs).
+        Helper function used to stop training early if the validation loss hasn't improved after a given amount of patience (epoch iterations).
         
         Parameters:
-            valid_loss (float) - epochs current validation loss
             patience (int) - number of updates to wait for improvement before termination
         """
         early_stop = False
@@ -383,16 +381,14 @@ class Utilities():
         
         return precision, recall
     
-    def calc_statistics(self, model, model_name, x_test, y_pred, y_true, n_preds):
+    def calc_statistics(self, model_name, y_pred, y_true, n_preds):
         """
         Used to calculate a table of statistics for the given model within a Pandas DataFrame. 
         
         The statistics include: classification accuracy, top-1 error rate, top-5 error rate, precision, recall, and F1-score.
         
         Parameters:
-            model (torchvision.models) - trained model
             model_name (string) - name of model
-            x_test (torch.DataLoader) - test or validation loader
             y_pred (torch.Tensor) - test or validation loader predictions
             y_true (torch.Tensor) - test or validation loader image labels
             n_preds (torch.Tensor) - test or validation loader n predictions
@@ -405,14 +401,14 @@ class Utilities():
         accuracy = top_1_correct / len(y_true)
         error_rate_1 = 1 - accuracy
         
-        # Calculate top-5 error rate
+        # Calculate top-N error rate
         n_preds, y_true = n_preds.to(self.device), y_true.to(self.device)
-        top_5_correct = 0
+        top_n_correct = 0
         for pred in range(len(y_true)):
             pred_bools = n_preds[pred].eq(y_true[pred])
             if True in pred_bools:
-                top_5_correct += 1
-        error_rate_5 = 1 - (top_5_correct / len(y_true))
+                top_n_correct += 1
+        error_rate_n = 1 - (top_n_correct / len(y_true))
         
         # Calculate f1-score
         f1_score = (2 * precision * recall) / (precision + recall)
@@ -421,7 +417,7 @@ class Utilities():
         stats = {'Name': model_name, 
                  'Accuracy': accuracy, 
                  'Top-1 Error': error_rate_1, 
-                 'Top-5 Error': error_rate_5, 
+                 f'Top-{len(n_preds[0])} Error': error_rate_n, 
                  'Precision': precision, 
                  'Recall': recall, 
                  'F1-Score': f1_score}
