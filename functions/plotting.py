@@ -1,11 +1,8 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
 from functions.tuning import Tuner
 
-import torch
-from sklearn.metrics import confusion_matrix
 from scikitplot.metrics import plot_confusion_matrix, plot_roc
 
 class Plotter():
@@ -98,7 +95,7 @@ class Plotter():
         plt.legend(loc="upper right")
         plt.title(f"{model_name} Loss Comparison")
     
-    def plot_cm(self, model, model_name, y_pred, y_true, save=False):
+    def plot_cm(self, model_name, y_pred, y_true, save=False):
         """
         Creates a confusion matrix for the given model.
         
@@ -109,16 +106,12 @@ class Plotter():
             y_true (torch.Tensor) - dataloader labels
         """
         # Plot confusion matrix
-        cm = confusion_matrix(y_true, y_pred, labels=self.class_labels)
-        disp = plot_confusion_matrix(y_true, y_pred, figsize=(25, 15),
-                                     labels=self.class_labels,
-                                     x_tick_rotation=90,
-                                     title=f"{model_name} Confusion Matrix")
-        
+        plot_confusion_matrix(y_true, y_pred, figsize=(25, 15), labels=self.class_labels,
+                              x_tick_rotation=90, title=f"{model_name} Confusion Matrix")
         if save:
             plt.savefig(f'plots/{model_name}_cm.png')
 
-    def plot_roc(self, model, model_name, y_probas, y_true, figsize=(25, 15), save=False):
+    def plot_roc(self, model_name, y_probas, y_true, figsize=(25, 15), save=False):
         """
         Creates multiple subplots of the ROC curve for each classes using the given model.
         
