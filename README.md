@@ -4,10 +4,9 @@ This repository focuses on a Wild Edible Plant Classifier that compares the perf
 
 ## Dataset
 
-<p align="center">
-  <img src="https://github.com/Achronus/wep-classifier/blob/main/imgs/plant-classes.png" alt="Wild Edible Plant Classes">
-  <p style="font-style: italic;">Figure 1. The 35 Wild Edible Plant classes used in the project.</p>
-</p>
+![Plant Classes](https://github.com/Achronus/wep-classifier/blob/main/imgs/plant-classes.png "Wild Edible Plant Classes")
+
+_Figure 1. The 35 Wild Edible Plant classes used in the project._
 
 The classes of wild edible plants used are listed in table 1, accompanied by the number of images (per class) within the dataset. The dataset created, comprised of Flickr images, is obtained through their API using the rudimentary scripts within the `\data_gathering` folder. The dataset can be found on Kaggle [here](https://www.kaggle.com/ryanpartridge01/wild-edible-plants/) and contains 16,535 images, where the quantity of images per class varies from 400 to 500.
 
@@ -68,19 +67,13 @@ The project is divided into three Jupyter Notebooks. The first one contains a sa
 </td></tr>
 </table>
 
-<p align="center">
-  <p style="font-style: italic;">Table 1. A detailed list of the Wild Edible Plant classes with the number of images per class within the dataset.</p>
-</p>
+_Table 1. A detailed list of the Wild Edible Plant classes with the number of images per class within the dataset._
 
 ## File Structure
 
-<p align="center">
+![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml-pipeline.png "Machine Learning Pipeline")
 
-  ![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml-pipeline.png "Machine Learning Pipeline")
-
-  _Figure 2. Machine Learning Pipeline diagram._
-
-</p>
+_Figure 2. Machine Learning Pipeline diagram._
 
 The file structure used for the artefact is outlined below and has helped to achieve the Machine Learning (ML) pipeline illustrated above.
 
