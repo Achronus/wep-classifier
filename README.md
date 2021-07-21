@@ -1,14 +1,20 @@
 # Wild Edible Plant Classifier
 
-This repository focuses on a Wild Edible Plant Classifier that compares the performance of three state-of-the-art CNN architectures: MobileNet v2, GoogLeNet, and ResNet-34. The artefact created is part of my BSc dissertation and is aimed at classifying 35 classes of wild edible plants using Transfer Learning.
+This repository focuses on a Wild Edible Plant Classifier that compares the performance of three state-of-the-art CNN architectures: MobileNet v2, GoogLeNet, and ResNet-34. The artefact created is part of my BSc dissertation, aimed at classifying 35 classes of wild edible plants using Transfer Learning.
 
 ## Dataset
 
+<p align="center">
+
 ![Plant Classes](https://github.com/Achronus/wep-classifier/blob/main/imgs/plant-classes.png "Wild Edible Plant Classes")
 
-The 35 classes of wild edible plants are listed in the table below, accompanied by the number of images (per class) within the dataset. The dataset created is comprised of Flickr images, obtained through their API using the rudimentary scripts within the `\data_gathering` folder. The dataset can be found on Kaggle [here](https://www.kaggle.com/ryanpartridge01/wild-edible-plants/) and contains 16,535 images, where the quantity of images per class varies from 400 to 500.
+_Figure 1. The 35 Wild Edible Plant classes used in the project._
 
-A sample of this dataset is used within the first Notebook to visualise  the classes of data. The small sample is contained within a zip file found inside the dataset folder.
+</p>
+
+The classes of wild edible plants used are listed in table 1, accompanied by the number of images (per class) within the dataset. The dataset created, comprised of Flickr images, is obtained through their API using the rudimentary scripts within the `\data_gathering` folder. The dataset can be found on Kaggle [here](https://www.kaggle.com/ryanpartridge01/wild-edible-plants/) and contains 16,535 images, where the quantity of images per class varies from 400 to 500.
+
+The project is divided into three Jupyter Notebooks. The first one contains a sample of the plant classes to visualise them, stored within a zip file found inside the dataset folder, and covers steps 4 to 6 in the Machine Learning Pipeline diagram (figure 2). The second notebook focuses on the tuning of the CNN models, and the third and final notebook visualises their results.
 
 <table>
 <tr><td>
@@ -65,9 +71,21 @@ A sample of this dataset is used within the first Notebook to visualise  the cla
 </td></tr>
 </table>
 
+<p align=center>
+
+_Table 1. A detailed list of the Wild Edible Plant classes with the number of images per class within the dataset._
+
+</p>
+
 ## File Structure
 
-![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml-pipeline.png "Machine Learning Pipeline")
+<p align="center">
+
+  ![ML Pipeline](https://github.com/Achronus/wep-classifier/blob/main/imgs/ml-pipeline.png "Machine Learning Pipeline")
+
+  _Figure 2. Machine Learning Pipeline diagram._
+
+</p>
 
 The file structure used for the artefact is outlined below and has helped to achieve the Machine Learning (ML) pipeline illustrated above.
 
